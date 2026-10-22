@@ -76,6 +76,235 @@ The input file must contain exactly three columns of finite numerical values, wi
 
 **Output:** The script prints the number of input points, the normalisation maxima, and the size and centroid coordinates of each cluster. It also displays a three-dimensional plot of the clustered points and their centroids.
 
+### `3D_plot_Mesenchyme_and_Ectoderm.py`
+
+**Purpose:** Visualise and compare the three-dimensional fluorescence point distributions of ectoderm and mesenchyme isolated from a limb bud and analysed separately by fluorescence-activated cell sorting (FACS).
+
+The script displays the two tissue compartments together in a common three-dimensional coordinate system, allowing their fluorescence point distributions to be inspected and compared visually.
+
+**Analysis workflow:**
+
+1. **Load the data:** Read the ectoderm and mesenchyme point clouds from two separate input files.
+2. **Distinguish the tissue compartments:** Display ectoderm points in blue and mesenchyme points in red.
+3. **Remove outliers:** Apply the same cutting plane to both point clouds to exclude points on one side of the specified plane.
+4. **Adjust visual scaling:** Apply the original axis-specific scaling factors to each point cloud.
+5. **Reduce point density:** Subsample each point cloud to reduce the number of closely spaced points displayed.
+6. **Visualise the results:** Display both point clouds in the same interactive three-dimensional plot, with axes and a white background.
+
+**Usage:**
+
+```bash
+python3 3D_plot_Mesenchyme_and_Ectoderm.py <ectoderm_file> <mesenchyme_file>
+```
+
+Provide the paths to the ectoderm and mesenchyme input files as the first and second arguments, respectively.
+
+**Output:** An interactive three-dimensional visualisation showing ectoderm in blue and mesenchyme in red.
+
+**Note:** The script applies different scaling factors to the two point clouds and performs geometric filtering and subsampling for visualisation. Consequently, the displayed coordinates are transformed for plotting and should not be interpreted as an unmodified quantitative comparison of the original fluorescence measurements.
+
+### `2D_plot_gene_expression.py`
+
+**Purpose:** Visualise the spatial distribution of a selected gene's normalised expression across the fluorescence-activated cell sorting (FACS) gates for Limb 127 (Limb 5) or Limb 128 (Limb 4).
+
+The script combines normalised two-dimensional cell-position data with gene expression counts obtained from the individual FACS gates. It generates a spatial visualisation in which the cells associated with each gate are coloured according to the normalised expression level of the selected gene in that gate.
+
+**Analysis workflow:**
+
+1. **Select the dataset and gene:** Specify Limb 127 or Limb 128 and the gene to visualise.
+2. **Load cell positions:** Read the normalised two-dimensional cell coordinates, centroids and gate-specific cell-position data.
+3. **Load gene counts:** Read the featureCounts output files corresponding to the individual FACS gates.
+4. **Calculate normalised expression:** For each gate, divide the selected gene's read count by the total read counts across the genes included in the denominator. The first two gene records are excluded from the denominator, following the original analysis.
+5. **Map expression to cell positions:** Assign each gate's normalised expression value to its corresponding two-dimensional cell-position point cloud.
+6. **Visualise and export:** Display the gate-specific point clouds using a grey colour scale, with darker and lighter shades representing different normalised expression levels, and save a screenshot as a PNG file.
+
+**Dataset and gate selection:**
+
+* **Limb 127 (Limb 5):** Uses FACS gates P5–P19.
+* **Limb 128 (Limb 4):** Uses FACS gates P21–P34.
+
+These gate ranges correspond to the datasets configured in the script.
+
+**Usage:**
+
+To plot a gene in Limb 127:
+
+```bash
+python3 2D_plot_gene_expression.py 127 --gene Sox9
+```
+
+To plot the same gene in Limb 128:
+
+```bash
+python3 2D_plot_gene_expression.py 128 --gene Sox9
+```
+
+Replace `Sox9` with the name of the gene of interest.
+
+**Input files:** The script requires the normalised cell-position data, gate-specific cell-position files and corresponding featureCounts gene-count files for the selected limb dataset. These files are expected in the appropriate `limb127_data/` or `limb128_data/` directory.
+
+**Output:** An interactive two-dimensional visualisation of the gate-specific cell-position point clouds, together with a PNG screenshot named after the selected gene. Screenshots are saved in the dataset's configured screenshot directory.
+
+**Interpretation:** The visualisation shows how the selected gene's normalised read-count abundance varies across the FACS gates and maps those differences onto their associated cell-position distributions. It provides a way to examine gene expression patterns in the reconstructed spatial context of the limb bud.
+
+### `clustering_script_with_rowwise_scaling_for_github_clean.py`
+
+**Purpose:** Perform double hierarchical clustering of the combined spatial gene-expression data from Limb 127 (Limb 5) and Limb 128 (Limb 4), identifying groups of spatial samples or regions with similar gene-expression profiles and groups of genes with similar expression patterns.
+
+The script analyses the combined gene-expression matrix, in which genes are represented by rows and spatial samples or regions by columns. It applies row-wise z-score normalisation so that clustering emphasises the relative expression pattern of each gene across the spatial regions, rather than differences in absolute expression levels between genes.
+
+**Analysis workflow:**
+
+1. **Load the combined expression matrix:** Read the Excel file `processed_data_combined_L127L128.xlsx`, containing gene-expression measurements for spatial samples or regions from both limbs.
+2. **Prepare the data:** Convert expression values to numeric format, remove entirely empty rows and columns, impute remaining missing values using the corresponding gene's mean, and remove genes with zero variance.
+3. **Normalise expression profiles:** Calculate row-wise z-scores for each gene across all spatial samples or regions.
+4. **Cluster spatial samples or regions:** Apply hierarchical clustering using Ward linkage and Euclidean distance, assigning the samples or regions to two clusters based on their normalised gene-expression profiles.
+5. **Calculate sample distances:** Calculate pairwise Euclidean distances between the normalised spatial expression profiles and save the resulting distance matrix.
+6. **Identify marker genes:** For each sample cluster, compare the original, unscaled expression values of each gene inside that cluster with values outside it. Calculate Welch's t-test p-values and adjust them for multiple testing using the Benjamini–Hochberg false discovery rate procedure.
+7. **Cluster genes:** Perform hierarchical clustering of the normalised gene-expression profiles, assigning genes to two expression clusters or modules.
+8. **Calculate gene-module scores:** Calculate the mean z-scored expression profile of the genes in each module across the spatial samples or regions.
+9. **Assess module enrichment:** Compare module scores between each sample cluster and the remaining samples, using Welch's t-tests and Benjamini–Hochberg-adjusted p-values.
+10. **Visualise the results:** Generate a hierarchically clustered gene-expression heatmap, a sample-clustering dendrogram, a gene-clustering dendrogram and a silhouette analysis plot to assess alternative numbers of gene clusters.
+
+**Input file:**
+
+`processed_data_combined_L127L128.xlsx`
+
+The input is expected to contain genes in rows and spatial samples or regions in columns, with gene names in the first column.
+
+**Pre-processing note:** Low-complexity voxels have already been excluded from this input dataset before the downstream clustering analysis. The script therefore operates on the pre-filtered dataset and does not perform the initial voxel-filtering step itself.
+
+**Clustering settings:**
+
+* **Sample clusters:** 2
+* **Gene clusters:** 2
+* **Linkage method:** Ward
+* **Distance metric:** Euclidean
+* **Expression scaling:** Row-wise z-score normalisation across spatial samples or regions
+
+**Output files:**
+
+| File                            | Description                                                                                                                                                      |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `distance_matrix.csv`           | Pairwise Euclidean distances between the normalised spatial sample or region expression profiles.                                                                |
+| `marker_genes_cluster_<ID>.csv` | Gene-level statistical comparisons between each sample cluster and the remaining samples, including mean expression differences, p-values and adjusted p-values. |
+| `gene_clusters.csv`             | Gene-to-cluster assignments.                                                                                                                                     |
+| `gene_module_scores.csv`        | Mean row-wise z-score expression profiles for the gene modules across spatial samples or regions.                                                                |
+| `gene_module_enrichment.csv`    | Statistical comparisons of gene-module scores between sample clusters and the remaining samples.                                                                 |
+
+**Visualisations:**
+
+* **Clustered heatmap:** Displays normalised gene-expression patterns with hierarchical clustering of both genes and spatial samples or regions.
+* **Sample dendrogram:** Shows the hierarchical relationships between spatial samples or regions.
+* **Gene dendrogram:** Shows the hierarchical relationships between genes, with branches coloured to distinguish the two gene clusters where possible.
+* **Silhouette analysis:** Evaluates clustering solutions across alternative numbers of gene clusters and reports the best-scoring solution among those tested.
+
+**Usage:**
+
+Run the script from the directory containing `processed_data_combined_L127L128.xlsx`:
+
+```bash
+python3 clustering_script_with_rowwise_scaling_for_github_clean.py
+```
+
+The script displays the plots interactively and saves the output CSV files in the current directory.
+
+**Interpretation:** The sample clustering groups spatial regions according to similarities in their overall gene-expression patterns, while the gene clustering identifies groups of genes with similar relative expression profiles across the combined spatial dataset. Marker-gene and gene-module analyses help characterise the expression differences associated with the resulting sample clusters.
+
+### `compute_FDR.py`
+
+**Purpose:** Apply the Benjamini–Hochberg false discovery rate (FDR) correction to pathway-enrichment p-values for the red and green gene clusters identified in the C3PO analysis.
+
+The script uses pathway-enrichment p-values obtained from external analyses to calculate FDR-adjusted p-values across five signalling pathways: BMP, TGF-β, FGF, Wnt and Hedgehog (HH). The p-values are hard-coded in the script, with BMP pathway values obtained from Reactome and the other pathway values obtained from PANTHER.
+
+**Analysis workflow:**
+
+1. **Load pathway-enrichment results:** Use the predefined p-values for the five signalling pathways in each of the red and green gene clusters.
+2. **Correct for multiple testing:** Apply the Benjamini–Hochberg procedure separately to the five pathway p-values for each cluster.
+3. **Display the results:** Print the pathway names, original p-values and FDR-adjusted p-values, sorted by adjusted p-value.
+
+**Pathways analysed:**
+
+* BMP
+* TGF-β
+* FGF
+* Wnt
+* Hedgehog (HH)
+
+**Usage:**
+
+Run the script using Python:
+
+```bash
+python3 compute_FDR.py
+```
+
+No input files or command-line arguments are required, as the pathway names and p-values are defined within the script.
+
+**Output:** The script prints separate tables for the red and green clusters, listing each pathway's original p-value and Benjamini–Hochberg-adjusted FDR value.
+
+**Interpretation:** The adjusted p-values account for multiple pathway tests within each cluster, helping assess the statistical significance of the pathway-enrichment results after correction for multiple comparisons.
+
+### `create_C3PO_limbnet_json.py`
+
+**Purpose:** Generate gene-specific JSON files containing normalized gene-expression values mapped onto the digitized 3D limb geometries used by LimbNet.
+
+The script combines gate-mapped JSON files with gene-expression counts from Limb 127 (Limb 5) and Limb 128 (Limb 4). For a specified gene, it extracts the expression count for each FACS gate, normalizes the values within each limb by that limb's maximum expression value, and adds the normalized values to the corresponding JSON structure. It also generates an average expression JSON by averaging the normalized values across the limbs in which expression was detected.
+
+**Inputs:**
+
+* **Gene name:** The gene to process, specified as a positional command-line argument.
+* **Limb 127 data directory:** Contains the L127 gene-count files.
+* **Limb 128 data directory:** Contains the L128 gene-count files.
+* **Digitizations directory:** Contains `limb4_colour_mapped.json` and `limb5_colour_mapped.json`, which provide the gate-mapped limb geometries.
+* **Output directory:** The destination for the generated JSON files.
+
+The script expects gene-count files to follow the naming convention:
+
+```text
+counts_L127P<gate>_doubletrimmed_sorted_markdup.txt
+counts_L128P<gate>_doubletrimmed_sorted_markdup.txt
+```
+
+For each gate, the script reads the specified gene's count from the first column of the gene-count data, skipping the first two lines. Expression values are normalized independently for each limb by dividing each gate's value by the maximum value for that gene in that limb. If the gene has no detected expression in a limb, the script skips that limb's output file. If expression is detected in only one limb, the average output is based on that limb alone.
+
+**Usage:**
+
+Run the script from the directory containing `create_C3PO_limbnet_json.py`, specifying the gene and all four directories:
+
+```bash
+python3 create_C3PO_limbnet_json.py Sox9 \
+    --limb127-dir ./limb127_data \
+    --limb128-dir ./limb128_data \
+    --gates-dir ./Digitizations \
+    --output-dir ./C3PO_limbnet_digitizations
+```
+
+Replace `Sox9` with the gene of interest and adjust the directory paths to match your file structure. The directories can be supplied as relative or absolute paths.
+
+For a list of available arguments, run:
+
+```bash
+python3 create_C3PO_limbnet_json.py -h
+```
+
+**Outputs:**
+
+The script writes the following files to the specified output directory, provided expression is detected in at least one limb:
+
+* `limb4_expression_<gene>.json` — normalized expression mapped onto Limb 4 (Limb 128).
+* `limb5_expression_<gene>.json` — normalized expression mapped onto Limb 5 (Limb 127).
+* `limb_avg_expression_<gene>.json` — average normalized expression across the limbs in which expression was detected.
+
+The output directory is created automatically if it does not already exist.
+
+**Important notes:**
+
+* Normalization is performed separately for each limb; values therefore represent relative expression within each limb, rather than directly comparable absolute expression levels.
+* The average JSON is calculated by averaging normalized values at corresponding positions in the two input sample arrays. The script uses the first available limb's JSON as the structural template for this output.
+* Samples that do not correspond to a valid FACS gate label receive a value of zero.
+* The script maps gate-level expression measurements onto the digitized geometry; the values are not single-cell expression measurements.
+
 
 ## Data and reproducibility
 
@@ -84,6 +313,13 @@ The data provided here support the analysis and visualisation of the C3PO experi
 The repository includes processed datasets, normalised FACS measurements, digitised tissue data and analysis scripts. These resources are intended to facilitate inspection of the data, reproduction of the analyses and further exploration of the results.
 
 Because the repository contains selected data generated during the study, it should not be interpreted as an exhaustive archive of every experiment or intermediate result produced during the project.
+
+## Data processing and filtering
+
+The combined gene-expression dataset, `processed_data_combined_L127L128.xlsx`, contains data from Limb 127 (Limb 5) and Limb 128 (Limb 4). Low-complexity voxels have already been excluded from this dataset prior to the downstream clustering analysis.
+
+Consequently, the clustering script operates on the pre-filtered dataset and does not perform this voxel-filtering step itself.
+
 
 ## Citation
 
