@@ -147,7 +147,7 @@ Replace `Sox9` with the name of the gene of interest.
 
 **Interpretation:** The visualisation shows how the selected gene's normalised read-count abundance varies across the FACS gates and maps those differences onto their associated cell-position distributions. It provides a way to examine gene expression patterns in the reconstructed spatial context of the limb bud.
 
-### `clustering_script_with_rowwise_scaling_for_github_clean.py`
+### `clustering_script_with_rowwise_scaling.py`
 
 **Purpose:** Perform double hierarchical clustering of the combined spatial gene-expression data from Limb 127 (Limb 5) and Limb 128 (Limb 4), identifying groups of spatial samples or regions with similar gene-expression profiles and groups of genes with similar expression patterns.
 
@@ -204,7 +204,7 @@ The input is expected to contain genes in rows and spatial samples or regions in
 Run the script from the directory containing `processed_data_combined_L127L128.xlsx`:
 
 ```bash
-python3 clustering_script_with_rowwise_scaling_for_github_clean.py
+python3 clustering_script_with_rowwise_scaling.py
 ```
 
 The script displays the plots interactively and saves the output CSV files in the current directory.
@@ -304,6 +304,69 @@ The output directory is created automatically if it does not already exist.
 * The average JSON is calculated by averaging normalized values at corresponding positions in the two input sample arrays. The script uses the first available limb's JSON as the structural template for this output.
 * Samples that do not correspond to a valid FACS gate label receive a value of zero.
 * The script maps gate-level expression measurements onto the digitized geometry; the values are not single-cell expression measurements.
+
+### `digitization_visualization.py`
+
+**Purpose:** Visualize gene-expression patterns or other numerical sample values mapped onto digitized 3D tissue geometries stored in JSON files. The script uses Vedo to display the digitized centroid positions as coloured 3D points, with configurable colour maps and normalization options.
+
+**Inputs:**
+
+* **JSON file:** A JSON file containing `centroids` (3D coordinates) and `samples` (numerical values associated with each centroid).
+* **Colour map:** Specifies the colour gradient used to represent the sample values.
+* **Normalization:** Determines how the sample values are transformed before visualization.
+
+**Available colour maps:**
+
+| Colour map    | Gradient       | Background |
+| ------------- | -------------- | ---------- |
+| `white-green` | White to green | White      |
+| `white-red`   | White to red   | White      |
+| `white-blue`  | White to blue  | White      |
+| `white-black` | White to black | White      |
+| `black-green` | Black to green | Black      |
+| `black-red`   | Black to red   | Black      |
+| `black-blue`  | Black to blue  | Black      |
+
+The background colour is selected automatically based on the chosen colour map: maps beginning with `white-` use a white background, while maps beginning with `black-` use a black background.
+
+**Normalization options:**
+
+* **`minmax`:** Applies min–max normalization to scale the input values to the range 0–1. The colour map is explicitly scaled to this range. If all input values are identical, they are set to zero.
+* **`none`:** Preserves the original values up to a square-root transformation, which is applied before visualization. Vedo automatically scales the colour map to the transformed data range. This option requires non-negative input values.
+
+**Usage:**
+
+Run the script with the JSON file, colour map and normalization method as positional arguments:
+
+```bash
+python3 digitization_visualization.py <json_file> <colormap> <normalization>
+```
+
+For example, to display the Sox9 expression pattern using a white-to-green colour map and min–max normalization:
+
+```bash
+python3 digitization_visualization.py \
+    C3PO_limbnet_digitizations/limb_avg_expression_Sox9.json \
+    white-green \
+    minmax
+```
+
+To use the square-root transformation instead:
+
+```bash
+python3 digitization_visualization.py \
+    C3PO_limbnet_digitizations/limb_avg_expression_Sox9.json \
+    white-green \
+    none
+```
+
+**Output:**
+
+The script opens an interactive 3D visualization window displaying the centroid positions coloured according to their associated sample values. It also prints the input JSON file, selected colour map, normalization method and background colour to the terminal. The script does not save an image or modify the input JSON file.
+
+**Validation:**
+
+The script checks that the JSON contains both `centroids` and `samples`, that their lengths match, that the coordinates and values are finite, and that the file contains at least one sample. Negative values are rejected when using the `none` normalization option because the square-root transformation requires non-negative values.
 
 
 ## Data and reproducibility
