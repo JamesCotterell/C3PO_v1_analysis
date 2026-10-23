@@ -149,26 +149,23 @@ Replace `Sox9` with the name of the gene of interest.
 
 ### `clustering_script_with_rowwise_scaling.py`
 
-**Purpose:** Perform double hierarchical clustering of the combined spatial gene-expression data from Limb 127 (Limb 5) and Limb 128 (Limb 4), identifying groups of spatial samples or regions with similar gene-expression profiles and groups of genes with similar expression patterns.
+**Purpose:** Perform hierarchical clustering of the combined spatial gene-expression data from Limb 127 (Limb 5) and Limb 128 (Limb 4), identifying groups of genes with similar expression patterns and visualising relationships between spatial samples or regions.
 
-The script analyses the combined gene-expression matrix, in which genes are represented by rows and spatial samples or regions by columns. It applies row-wise z-score normalisation so that clustering emphasises the relative expression pattern of each gene across the spatial regions, rather than differences in absolute expression levels between genes.
+The script analyses the combined gene-expression matrix, in which genes are represented by rows and spatial samples or regions by columns. It applies row-wise z-score normalisation so that gene clustering emphasises the relative expression pattern of each gene across spatial regions, rather than differences in absolute expression levels between genes.
 
 **Analysis workflow:**
 
-1. **Load the combined expression matrix:** Read the Excel file `processed_data_combined_L127L128.xlsx`, containing gene-expression measurements for spatial samples or regions from both limbs.
+1. **Load the combined expression matrix:** Read `../processed_data_combined_L127L128.xlsx`, containing gene-expression measurements for spatial samples or regions from both limbs.
 2. **Prepare the data:** Convert expression values to numeric format, remove entirely empty rows and columns, impute remaining missing values using the corresponding gene's mean, and remove genes with zero variance.
 3. **Normalise expression profiles:** Calculate row-wise z-scores for each gene across all spatial samples or regions.
-4. **Cluster spatial samples or regions:** Apply hierarchical clustering using Ward linkage and Euclidean distance, assigning the samples or regions to two clusters based on their normalised gene-expression profiles.
-5. **Calculate sample distances:** Calculate pairwise Euclidean distances between the normalised spatial expression profiles and save the resulting distance matrix.
-6. **Identify marker genes:** For each sample cluster, compare the original, unscaled expression values of each gene inside that cluster with values outside it. Calculate Welch's t-test p-values and adjust them for multiple testing using the Benjamini–Hochberg false discovery rate procedure.
-7. **Cluster genes:** Perform hierarchical clustering of the normalised gene-expression profiles, assigning genes to two expression clusters or modules.
-8. **Calculate gene-module scores:** Calculate the mean z-scored expression profile of the genes in each module across the spatial samples or regions.
-9. **Assess module enrichment:** Compare module scores between each sample cluster and the remaining samples, using Welch's t-tests and Benjamini–Hochberg-adjusted p-values.
-10. **Visualise the results:** Generate a hierarchically clustered gene-expression heatmap, a sample-clustering dendrogram, a gene-clustering dendrogram and a silhouette analysis plot to assess alternative numbers of gene clusters.
+4. **Cluster spatial samples or regions:** Apply hierarchical clustering using Ward linkage and Euclidean distance to generate the sample dendrogram.
+5. **Cluster genes:** Apply hierarchical clustering to the normalised gene-expression profiles, requesting two gene clusters.
+6. **Export gene lists:** Save the genes assigned to each cluster in separate plain-text files for downstream pathway-enrichment analysis using PANTHER.
+7. **Visualise the results:** Generate a hierarchically clustered gene-expression heatmap, a sample-clustering dendrogram, a gene-clustering dendrogram and a silhouette analysis plot to evaluate alternative numbers of gene clusters.
 
 **Input file:**
 
-`processed_data_combined_L127L128.xlsx`
+`../processed_data_combined_L127L128.xlsx`
 
 The input is expected to contain genes in rows and spatial samples or regions in columns, with gene names in the first column.
 
@@ -176,40 +173,39 @@ The input is expected to contain genes in rows and spatial samples or regions in
 
 **Clustering settings:**
 
-* **Sample clusters:** 2
-* **Gene clusters:** 2
+* **Gene clusters:** 2 requested
 * **Linkage method:** Ward
 * **Distance metric:** Euclidean
 * **Expression scaling:** Row-wise z-score normalisation across spatial samples or regions
 
 **Output files:**
 
-| File                            | Description                                                                                                                                                      |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `distance_matrix.csv`           | Pairwise Euclidean distances between the normalised spatial sample or region expression profiles.                                                                |
-| `marker_genes_cluster_<ID>.csv` | Gene-level statistical comparisons between each sample cluster and the remaining samples, including mean expression differences, p-values and adjusted p-values. |
-| `gene_clusters.csv`             | Gene-to-cluster assignments.                                                                                                                                     |
-| `gene_module_scores.csv`        | Mean row-wise z-score expression profiles for the gene modules across spatial samples or regions.                                                                |
-| `gene_module_enrichment.csv`    | Statistical comparisons of gene-module scores between sample clusters and the remaining samples.                                                                 |
+| File                  | Description                                               |
+| --------------------- | --------------------------------------------------------- |
+| `genes_cluster_1.txt` | Gene names assigned to gene cluster 1, one gene per line. |
+| `genes_cluster_2.txt` | Gene names assigned to gene cluster 2, one gene per line. |
+
+The script writes one file for each cluster returned by the clustering algorithm. The output files contain gene names suitable for use as input gene lists for PANTHER pathway-enrichment analysis.
 
 **Visualisations:**
 
 * **Clustered heatmap:** Displays normalised gene-expression patterns with hierarchical clustering of both genes and spatial samples or regions.
-* **Sample dendrogram:** Shows the hierarchical relationships between spatial samples or regions.
-* **Gene dendrogram:** Shows the hierarchical relationships between genes, with branches coloured to distinguish the two gene clusters where possible.
-* **Silhouette analysis:** Evaluates clustering solutions across alternative numbers of gene clusters and reports the best-scoring solution among those tested.
+* **Sample dendrogram:** Shows hierarchical relationships between spatial samples or regions based on their normalised gene-expression profiles.
+* **Gene dendrogram:** Shows hierarchical relationships between genes, with branches coloured to distinguish the two gene clusters where possible.
+* **Silhouette analysis:** Evaluates clustering solutions across alternative numbers of gene clusters and displays their silhouette scores. This analysis does not change the primary gene-clustering solution.
 
 **Usage:**
 
-Run the script from the directory containing `processed_data_combined_L127L128.xlsx`:
+Run the script from the `scripts` directory, assuming the Excel file is located in the repository's parent directory:
 
 ```bash
 python3 clustering_script_with_rowwise_scaling.py
 ```
 
-The script displays the plots interactively and saves the output CSV files in the current directory.
+The script displays the plots interactively and saves the gene-list text files in the current working directory. The output directory is configured by `OUTPUT_DIR` in the script.
 
-**Interpretation:** The sample clustering groups spatial regions according to similarities in their overall gene-expression patterns, while the gene clustering identifies groups of genes with similar relative expression profiles across the combined spatial dataset. Marker-gene and gene-module analyses help characterise the expression differences associated with the resulting sample clusters.
+**Interpretation:** Gene clustering identifies groups of genes with similar relative expression profiles across the combined spatial dataset. The resulting gene lists can be used for downstream pathway-enrichment analysis. The sample dendrogram and clustered heatmap provide complementary visualisations of similarities between spatial regions.
+
 
 ### `compute_FDR.py`
 
