@@ -43,13 +43,13 @@ point_radius = 8
 point_opacity = 0.5
 
 if limb == 127:
-    data_dir = Path("./limb127_data")
+    data_dir = Path("./../limb127_data")
     start_gate = 5
     end_gate = 20
     gate_prefix = "L127"
     screenshot_dir = data_dir / "screenshots"
 else:
-    data_dir = Path("./limb128_data")
+    data_dir = Path("./../limb128_data")
     start_gate = 21
     end_gate = 35
     gate_prefix = "L128"
