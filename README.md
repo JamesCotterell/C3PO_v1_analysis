@@ -152,6 +152,8 @@ Provide the paths to the ectoderm and mesenchyme input files as the first and se
 
 **Note:** The script applies different scaling factors to the two point clouds and performs geometric filtering and subsampling for visualisation. Consequently, the displayed coordinates are transformed for plotting and should not be interpreted as an unmodified quantitative comparison of the original fluorescence measurements.
 
+**Note on visualisation scaling:** For Limbs 89 and 87, the scaling factors applied to the three dimensions may need to be adjusted to obtain an appropriate visual representation of the ectoderm and mesenchyme point distributions.
+
 ### `2D_plot_gene_expression.py`
 
 **Purpose:** Visualise the spatial distribution of a selected gene's normalised expression across the fluorescence-activated cell sorting (FACS) gates for Limb 127 (Limb 5) or Limb 128 (Limb 4).
