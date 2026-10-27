@@ -21,16 +21,61 @@ The repository is organised as follows:
 | `Normalized_FACS_data/`                 | Normalised fluorescence-activated cell sorting (FACS) data.                                      |
 | `processed_data_combined_L127L128.xlsx` | Combined processed data for experimental samples Limb 127 and Limb 128.                          |
 
-## Dataset naming conventions
+## Dataset naming conventions and experimental groups
 
-Two principal datasets are referred to by different names in the repository and manuscript. These names reflect two different numbering systems:
+The repository contains eight principal datasets, referred to by different names in the repository and manuscript. The datasets fall into three experimental groups, each supporting a different aspect of the C3PO method.
 
-* **Limb 127 = Limb 5**
-* **Limb 128 = Limb 4**
+### 1. Transcriptomics datasets
 
-The numbers **127 and 128** identify the original experiments, whereas **Limb 5 and Limb 4** refer to the order in which the respective datasets were presented in the manuscript.
+These datasets combine C3PO spatial encoding with gene-expression measurements and are used for the spatial transcriptomics analyses.
 
-Consequently, the same dataset may be referred to by either name, depending on the context. For example, files associated with `limb127_data/` correspond to Limb 5 in the manuscript, while files associated with `limb128_data/` correspond to Limb 4.
+| Experimental dataset | Manuscript name | Description                                         |
+| -------------------- | --------------- | --------------------------------------------------- |
+| Limb 128             | Limb 4          | C3PO spatial encoding with transcriptomic profiling |
+| Limb 127             | Limb 5          | C3PO spatial encoding with transcriptomic profiling |
+
+These datasets are used by the following scripts:
+
+* `clustering_script_with_rowwise_scaling.py` — hierarchical clustering of spatial gene-expression profiles.
+* `2D_plot_gene_expression.py` — visualisation of gene expression across FACS gates.
+* `create_C3PO_limbnet_json.py` — mapping gene-expression measurements onto digitised 3D limb geometries.
+* `digitization_visualization.py` — visualisation of values mapped onto digitised 3D tissue geometries.
+
+### 2. Ectoderm and mesenchyme separation datasets
+
+These datasets were generated using C3PO without transcriptomic profiling. The ectoderm and mesenchyme were separated before fluorescence-activated cell sorting (FACS), allowing the fluorescence distributions of the two tissue compartments to be analysed independently.
+
+| Experimental dataset | Manuscript name | Description                                                |
+| -------------------- | --------------- | ---------------------------------------------------------- |
+| Limb 76              | Limb 1          | C3PO encoding; ectoderm and mesenchyme analysed separately |
+| Limb 89              | Limb 2          | C3PO encoding; ectoderm and mesenchyme analysed separately |
+| Limb 87              | Limb 3          | C3PO encoding; ectoderm and mesenchyme analysed separately |
+
+These datasets are used by:
+
+* `3D_plot_Mesenchyme_and_Ectoderm.py` — visualisation and comparison of the 3D fluorescence distributions of ectoderm and mesenchyme.
+
+### 3. Optical encoding validation datasets
+
+These datasets were generated using C3PO without transcriptomic profiling. They were used to validate the ability to resolve the eight optical addresses encoded into the tissue by photobleaching.
+
+| Experimental dataset | Manuscript reference   | Description                               |
+| -------------------- | ---------------------- | ----------------------------------------- |
+| Limb 74              | Figure S5, top limb    | Validation of the eight optical addresses |
+| Limb 80              | Figure S5, middle limb | Validation of the eight optical addresses |
+| Limb 69              | Figure S5, bottom limb | Validation of the eight optical addresses |
+
+These datasets are used by:
+
+* `3D_plot_allornothinglimbs_with_clusters.py` — hierarchical clustering and visualisation of fluorescence measurements to assess whether the eight intended optical encoding zones can be distinguished.
+
+### Naming conventions
+
+The experimental dataset numbers identify the original experiments, whereas the manuscript limb numbers indicate the order in which the transcriptomics and ectoderm–mesenchyme datasets are presented in the manuscript. The three optical encoding validation datasets are identified by their positions in Figure S5.
+
+Consequently, the same dataset may be referred to by different names depending on the context. For example, files associated with `limb127_data/` correspond to Limb 5 in the manuscript, while files associated with `limb128_data/` correspond to Limb 4.
+
+Transcriptomic analyses are restricted to Limbs 127 and 128. The remaining six datasets support the evaluation of C3PO optical encoding and the analysis of tissue-compartment-specific fluorescence distributions.
 
 Not all data generated during the study were included in the manuscript. This repository contains selected data and analysis resources associated with the study; therefore, not every file necessarily corresponds to a result or figure presented in the paper.
 
@@ -53,6 +98,8 @@ Some analyses may require input data from the directories included in this repos
 ### `3D_plot_allornothinglimbs_with_clusters.py`
 
 **Purpose:** Identify and visualise eight clusters in three-dimensional fluorescence data, corresponding to the eight intended optical encoding zones generated by C3PO.
+
+This script is associated with the optical encoding validation experiments using Limbs 74, 80 and 69, shown in Figure S5. These datasets do not include transcriptomic profiling.
 
 In this experiment, all-or-nothing photobleaching along three orthogonal axes was used to generate eight spatial zones, each representing a distinct combination of the three binary encoding dimensions. The script analyses three fluorescence measurements corresponding to these dimensions to assess the distribution of the encoded points in three-dimensional fluorescence space.
 
@@ -80,6 +127,8 @@ The input file must contain exactly three columns of finite numerical values, wi
 
 **Purpose:** Visualise and compare the three-dimensional fluorescence point distributions of ectoderm and mesenchyme isolated from a limb bud and analysed separately by fluorescence-activated cell sorting (FACS).
 
+This script is associated with the ectoderm–mesenchyme separation experiments using Limbs 76, 89 and 87, corresponding to manuscript Limbs 1, 2 and 3. These datasets do not include transcriptomic profiling.
+
 The script displays the two tissue compartments together in a common three-dimensional coordinate system, allowing their fluorescence point distributions to be inspected and compared visually.
 
 **Analysis workflow:**
@@ -106,6 +155,8 @@ Provide the paths to the ectoderm and mesenchyme input files as the first and se
 ### `2D_plot_gene_expression.py`
 
 **Purpose:** Visualise the spatial distribution of a selected gene's normalised expression across the fluorescence-activated cell sorting (FACS) gates for Limb 127 (Limb 5) or Limb 128 (Limb 4).
+
+This script uses the transcriptomics datasets from Limbs 127 and 128, which combine C3PO spatial encoding with gene-expression measurements.
 
 The script combines normalised two-dimensional cell-position data with gene expression counts obtained from the individual FACS gates. It generates a spatial visualisation in which the cells associated with each gate are coloured according to the normalised expression level of the selected gene in that gate.
 
@@ -150,6 +201,8 @@ Replace `Sox9` with the name of the gene of interest.
 ### `clustering_script_with_rowwise_scaling.py`
 
 **Purpose:** Perform hierarchical clustering of the combined spatial gene-expression data from Limb 127 (Limb 5) and Limb 128 (Limb 4), identifying groups of genes with similar expression patterns and visualising relationships between spatial samples or regions.
+
+This analysis uses the two transcriptomics datasets. The other six datasets do not contain transcriptomic measurements and are not included in this gene-expression clustering analysis.
 
 The script analyses the combined gene-expression matrix, in which genes are represented by rows and spatial samples or regions by columns. It applies row-wise z-score normalisation so that gene clustering emphasises the relative expression pattern of each gene across spatial regions, rather than differences in absolute expression levels between genes.
 
@@ -206,7 +259,6 @@ The script displays the plots interactively and saves the gene-list text files i
 
 **Interpretation:** Gene clustering identifies groups of genes with similar relative expression profiles across the combined spatial dataset. The resulting gene lists can be used for downstream pathway-enrichment analysis. The sample dendrogram and clustered heatmap provide complementary visualisations of similarities between spatial regions.
 
-
 ### `compute_FDR.py`
 
 **Purpose:** Apply the Benjamini–Hochberg false discovery rate (FDR) correction to pathway-enrichment p-values for the red and green gene clusters identified in the C3PO analysis.
@@ -243,16 +295,18 @@ No input files or command-line arguments are required, as the pathway names and 
 
 ### `create_C3PO_limbnet_json.py`
 
-**Purpose:** Generate gene-specific JSON files containing normalized gene-expression values mapped onto the digitized 3D limb geometries used by LimbNet.
+**Purpose:** Generate gene-specific JSON files containing normalised gene-expression values mapped onto the digitised 3D limb geometries used by LimbNet.
 
-The script combines gate-mapped JSON files with gene-expression counts from Limb 127 (Limb 5) and Limb 128 (Limb 4). For a specified gene, it extracts the expression count for each FACS gate, normalizes the values within each limb by that limb's maximum expression value, and adds the normalized values to the corresponding JSON structure. It also generates an average expression JSON by averaging the normalized values across the limbs in which expression was detected.
+This script uses the transcriptomics datasets from Limb 127 (Limb 5) and Limb 128 (Limb 4). It is not intended for the six datasets without transcriptomic profiling.
+
+The script combines gate-mapped JSON files with gene-expression counts from Limb 127 and Limb 128. For a specified gene, it extracts the expression count for each FACS gate, normalises the values within each limb by that limb's maximum expression value, and adds the normalised values to the corresponding JSON structure. It also generates an average expression JSON by averaging the normalised values across the limbs in which expression was detected.
 
 **Inputs:**
 
 * **Gene name:** The gene to process, specified as a positional command-line argument.
 * **Limb 127 data directory:** Contains the L127 gene-count files.
 * **Limb 128 data directory:** Contains the L128 gene-count files.
-* **Digitizations directory:** Contains `limb4_colour_mapped.json` and `limb5_colour_mapped.json`, which provide the gate-mapped limb geometries.
+* **Digitisations directory:** Contains `limb4_colour_mapped.json` and `limb5_colour_mapped.json`, which provide the gate-mapped limb geometries.
 * **Output directory:** The destination for the generated JSON files.
 
 The script expects gene-count files to follow the naming convention:
@@ -262,7 +316,7 @@ counts_L127P<gate>_doubletrimmed_sorted_markdup.txt
 counts_L128P<gate>_doubletrimmed_sorted_markdup.txt
 ```
 
-For each gate, the script reads the specified gene's count from the first column of the gene-count data, skipping the first two lines. Expression values are normalized independently for each limb by dividing each gate's value by the maximum value for that gene in that limb. If the gene has no detected expression in a limb, the script skips that limb's output file. If expression is detected in only one limb, the average output is based on that limb alone.
+For each gate, the script reads the specified gene's count from the first column of the gene-count data, skipping the first two lines. Expression values are normalised independently for each limb by dividing each gate's value by the maximum value for that gene in that limb. If the gene has no detected expression in a limb, the script skips that limb's output file. If expression is detected in only one limb, the average output is based on that limb alone.
 
 **Usage:**
 
@@ -288,28 +342,30 @@ python3 create_C3PO_limbnet_json.py -h
 
 The script writes the following files to the specified output directory, provided expression is detected in at least one limb:
 
-* `limb4_expression_<gene>.json` — normalized expression mapped onto Limb 4 (Limb 128).
-* `limb5_expression_<gene>.json` — normalized expression mapped onto Limb 5 (Limb 127).
-* `limb_avg_expression_<gene>.json` — average normalized expression across the limbs in which expression was detected.
+* `limb4_expression_<gene>.json` — normalised expression mapped onto Limb 4 (Limb 128).
+* `limb5_expression_<gene>.json` — normalised expression mapped onto Limb 5 (Limb 127).
+* `limb_avg_expression_<gene>.json` — average normalised expression across the limbs in which expression was detected.
 
 The output directory is created automatically if it does not already exist.
 
 **Important notes:**
 
-* Normalization is performed separately for each limb; values therefore represent relative expression within each limb, rather than directly comparable absolute expression levels.
-* The average JSON is calculated by averaging normalized values at corresponding positions in the two input sample arrays. The script uses the first available limb's JSON as the structural template for this output.
+* Normalisation is performed separately for each limb; values therefore represent relative expression within each limb, rather than directly comparable absolute expression levels.
+* The average JSON is calculated by averaging normalised values at corresponding positions in the two input sample arrays. The script uses the first available limb's JSON as the structural template for this output.
 * Samples that do not correspond to a valid FACS gate label receive a value of zero.
-* The script maps gate-level expression measurements onto the digitized geometry; the values are not single-cell expression measurements.
+* The script maps gate-level expression measurements onto the digitised geometry; the values are not single-cell expression measurements.
 
 ### `digitization_visualization.py`
 
-**Purpose:** Visualize gene-expression patterns or other numerical sample values mapped onto digitized 3D tissue geometries stored in JSON files. The script uses Vedo to display the digitized centroid positions as coloured 3D points, with configurable colour maps and normalization options.
+**Purpose:** Visualise gene-expression patterns or other numerical sample values mapped onto digitised 3D tissue geometries stored in JSON files. The script uses Vedo to display the digitised centroid positions as coloured 3D points, with configurable colour maps and normalisation options.
+
+This is a general-purpose visualisation script. It can be used to inspect JSON files containing digitised geometries and associated sample values, including gene-expression JSON files generated by `create_C3PO_limbnet_json.py`.
 
 **Inputs:**
 
 * **JSON file:** A JSON file containing `centroids` (3D coordinates) and `samples` (numerical values associated with each centroid).
 * **Colour map:** Specifies the colour gradient used to represent the sample values.
-* **Normalization:** Determines how the sample values are transformed before visualization.
+* **Normalisation:** Determines how the sample values are transformed before visualisation.
 
 **Available colour maps:**
 
@@ -325,20 +381,20 @@ The output directory is created automatically if it does not already exist.
 
 The background colour is selected automatically based on the chosen colour map: maps beginning with `white-` use a white background, while maps beginning with `black-` use a black background.
 
-**Normalization options:**
+**Normalisation options:**
 
-* **`minmax`:** Applies min–max normalization to scale the input values to the range 0–1. The colour map is explicitly scaled to this range. If all input values are identical, they are set to zero.
-* **`none`:** Preserves the original values up to a square-root transformation, which is applied before visualization. Vedo automatically scales the colour map to the transformed data range. This option requires non-negative input values.
+* **`minmax`:** Applies min–max normalisation to scale the input values to the range 0–1. The colour map is explicitly scaled to this range. If all input values are identical, they are set to zero.
+* **`none`:** Preserves the original values up to a square-root transformation, which is applied before visualisation. Vedo automatically scales the colour map to the transformed data range. This option requires non-negative input values.
 
 **Usage:**
 
-Run the script with the JSON file, colour map and normalization method as positional arguments:
+Run the script with the JSON file, colour map and normalisation method as positional arguments:
 
 ```bash
 python3 digitization_visualization.py <json_file> <colormap> <normalization>
 ```
 
-For example, to display the Sox9 expression pattern using a white-to-green colour map and min–max normalization:
+For example, to display the Sox9 expression pattern using a white-to-green colour map and min–max normalisation:
 
 ```bash
 python3 digitization_visualization.py \
@@ -358,18 +414,19 @@ python3 digitization_visualization.py \
 
 **Output:**
 
-The script opens an interactive 3D visualization window displaying the centroid positions coloured according to their associated sample values. It also prints the input JSON file, selected colour map, normalization method and background colour to the terminal. The script does not save an image or modify the input JSON file.
+The script opens an interactive 3D visualisation window displaying the centroid positions coloured according to their associated sample values. It also prints the input JSON file, selected colour map, normalisation method and background colour to the terminal. The script does not save an image or modify the input JSON file.
 
 **Validation:**
 
-The script checks that the JSON contains both `centroids` and `samples`, that their lengths match, that the coordinates and values are finite, and that the file contains at least one sample. Negative values are rejected when using the `none` normalization option because the square-root transformation requires non-negative values.
-
+The script checks that the JSON contains both `centroids` and `samples`, that their lengths match, that the coordinates and values are finite, and that the file contains at least one sample. Negative values are rejected when using the `none` normalisation option because the square-root transformation requires non-negative values.
 
 ## Data and reproducibility
 
 The data provided here support the analysis and visualisation of the C3PO experimental results.
 
 The repository includes processed datasets, normalised FACS measurements, digitised tissue data and analysis scripts. These resources are intended to facilitate inspection of the data, reproduction of the analyses and further exploration of the results.
+
+The eight principal datasets support three complementary aspects of the study: spatial transcriptomics, comparison of ectoderm and mesenchyme fluorescence distributions, and validation of the eight intended optical encoding zones.
 
 Because the repository contains selected data generated during the study, it should not be interpreted as an exhaustive archive of every experiment or intermediate result produced during the project.
 
@@ -379,8 +436,9 @@ The combined gene-expression dataset, `processed_data_combined_L127L128.xlsx`, c
 
 Consequently, the clustering script operates on the pre-filtered dataset and does not perform this voxel-filtering step itself.
 
-
 ## Citation
 
-If you use the code or data in this reposito
+If you use the code or data in this repository, please cite the associated C3PO manuscript:
+
+*Cell 3D Positioning by Optical encoding (C3PO) and its application to spatial transcriptomics.*
 
