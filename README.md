@@ -8,8 +8,6 @@ C3PO is a method for preserving three-dimensional positional information in biol
 
 This repository provides selected data and analysis scripts associated with the study, supporting transparency, reproducibility and reuse of the results.
 
-[[_TOC_]]
-
 ## Repository contents
 
 The repository is organised as follows:
