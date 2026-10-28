@@ -124,7 +124,7 @@ The relevant scripts can be found in the [`cmdlimb/scripts`](https://git.embl.or
 This tagged module version is the "version of record" provided as-is with this publication.
 An up-to-date version can be found at [https://git.embl.org/grp-simbiont/limbnet/cmdlimb](https://git.embl.org/grp-simbiont/limbnet/cmdlimb).
 
-In order to use most functions of the LimbNET API, a user account is required; please see [https://limbnet.ebml.es](https://limbnet.ebml.es) for further information.
+In order to use most functions of the LimbNET API, a user account is required; please see [https://limbnet.embl.es](https://limbnet.embl.es) for further information.
 
 ### `3D_plot_allornothinglimbs_with_clusters.py`
 
