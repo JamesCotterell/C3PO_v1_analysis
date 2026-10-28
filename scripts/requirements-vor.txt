@@ -1,0 +1,9 @@
+# Package requirements for publication Version of Record
+matplotlib==3.10.9
+numpy==2.2.6
+pandas
+scikit-learn
+scipy
+seaborn
+statsmodels
+vedo==2024.5.1

@@ -101,7 +101,7 @@ Some analyses may require input data from the directories included in this repos
 
 The scripts provided here were run using Python 3.10; we assure compatibility with this version however newer versions of Python should also work.
 
-Required package versions are provided in `scripts/requirements.txt`.
+Required package versions are provided in `scripts/requirements-vor.txt`.
 Other package versions may also be compatible; the stated package versions are those used in the published "version of record".
 
 Packages may be installed individually/in combination as desired using your chosen package management system.
@@ -111,7 +111,7 @@ For example, using Python's built in `venv` module:
 
 1. Create a virtual environment: `$ python3 -m venv .venv`
 2. Activate it: `$ source .venv/bin/activate`
-3. Install all requirements into the active virtual environment: `$ pip install -r $C3PO_REPO/scripts/requirements.txt` where `$C3PO_REPO` is the path to this repo's directory.
+3. Install all requirements into the active virtual environment: `$ pip install -r $C3PO_REPO/scripts/requirements-vor.txt` where `$C3PO_REPO` is the path to this repo's directory.
 
 With the virtual environment activated you are ready to run the scripts according to the instructions in this README.
 
